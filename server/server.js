@@ -4,10 +4,31 @@ const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
 const jwt = require("jsonwebtoken")
+const helmet = require("helmet")
+const rateLimit = require("express-rate-limit")
 
 const app = express()
 
-app.use(cors())
+// ---------------- SECURITY ----------------
+
+// adds security headers
+app.use(helmet())
+
+// limit requests to prevent spam
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+})
+
+app.use(limiter)
+
+// ---------------- MIDDLEWARE ----------------
+
+// restrict API access to your frontend domain
+app.use(cors({
+  origin: "https://react-app.vercel.app"
+}))
+
 app.use(express.json())
 
 // ---------------- DATABASE CONNECTION ----------------
@@ -18,11 +39,16 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ---------------- DATABASE MODEL ----------------
 
-const ContactSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  message: String
-})
+const ContactSchema = new mongoose.Schema(
+  {
+    name: String,
+    email: String,
+    message: String
+  },
+  {
+    timestamps: true
+  }
+)
 
 const Contact = mongoose.model("Contact", ContactSchema)
 
@@ -101,6 +127,8 @@ app.get("/api/contacts", async (req, res) => {
   }
 
 })
+
+// ---------------- DELETE MESSAGE ----------------
 
 app.delete("/api/contact/:id", async (req, res) => {
 

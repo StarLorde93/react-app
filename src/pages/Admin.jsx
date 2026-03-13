@@ -3,36 +3,81 @@ import { useEffect, useState } from "react"
 function Admin() {
 
   const [contacts, setContacts] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const token = localStorage.getItem("token")
 
-  const fetchContacts = () => {
+  useEffect(() => {
 
-    fetch("https://react-backend-kzpr.onrender.com/api/contacts", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => setContacts(data))
+    // redirect to login if no token
+    if (!token) {
+      window.location.href = "/login"
+      return
+    }
+
+    fetchContacts()
+
+  }, [])
+
+  const fetchContacts = async () => {
+
+    try {
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contacts`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await res.json()
+
+      setContacts(data)
+
+    } catch (error) {
+
+      console.error(error)
+      alert("Failed to load messages")
+
+    } finally {
+
+      setLoading(false)
+
+    }
 
   }
 
-  useEffect(() => {
-    fetchContacts()
-  }, [])
-
   const deleteMessage = async (id) => {
 
-    await fetch(`https://react-backend-kzpr.onrender.com/api/contact/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const confirmDelete = window.confirm("Delete this message?")
 
-    fetchContacts()
+    if (!confirmDelete) return
 
+    try {
+
+      await fetch(`${import.meta.env.VITE_API_URL}/api/contact/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      fetchContacts()
+
+    } catch (error) {
+
+      console.error(error)
+      alert("Failed to delete message")
+
+    }
+
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-20 text-xl">
+        Loading messages...
+      </div>
+    )
   }
 
   return (
@@ -44,6 +89,12 @@ function Admin() {
       </h1>
 
       <div className="space-y-6">
+
+        {contacts.length === 0 && (
+          <p className="text-center text-gray-500">
+            No messages yet
+          </p>
+        )}
 
         {contacts.map(contact => (
 

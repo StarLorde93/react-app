@@ -5,29 +5,59 @@ function Contact() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const response = await fetch("https://react-backend-kzpr.onrender.com/api/contact", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        message
+    // prevent multiple submissions
+    if (loading) return
+
+    // simple validation
+    if (!name || !email || !message) {
+      alert("Please fill all fields")
+      return
+    }
+
+    if (!email.includes("@")) {
+      alert("Please enter a valid email")
+      return
+    }
+
+    try {
+
+      setLoading(true)
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message
+        })
       })
-    })
 
-    const data = await response.json()
+      const data = await response.json()
 
-    alert(data.message)
+      alert(data.message)
 
-    setName("")
-    setEmail("")
-    setMessage("")
+      setName("")
+      setEmail("")
+      setMessage("")
+
+    } catch (error) {
+
+      console.error(error)
+      alert("Something went wrong")
+
+    } finally {
+
+      setLoading(false)
+
+    }
   }
 
   return (
@@ -68,8 +98,12 @@ function Contact() {
             required
           />
 
-          <button className="w-full bg-blue-600 text-white py-3 rounded">
-            Send Message
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded disabled:opacity-50"
+          >
+            {loading ? "Sending..." : "Send Message"}
           </button>
 
         </form>
