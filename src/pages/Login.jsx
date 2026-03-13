@@ -9,23 +9,29 @@ function Login() {
 
     e.preventDefault()
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    })
+    try {
 
-    const data = await res.json()
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      })
 
-    if (data.token) {
+      const data = await res.json()
+
+      if (!res.ok) {
+        alert(data.message || "Login failed")
+        return
+      }
 
       localStorage.setItem("token", data.token)
 
       window.location.href = "/admin"
 
-    } else {
+    } catch (err) {
 
-      alert("Login failed")
+      console.error(err)
+      alert("Server error")
 
     }
 
