@@ -8,7 +8,7 @@ function Admin() {
 
   const fetchContacts = () => {
 
-    fetch("http://localhost:5000/api/contacts", {
+    fetch("https://react-backend-kzpr.onrender.com/api/contacts", {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -24,7 +24,7 @@ function Admin() {
 
   const deleteMessage = async (id) => {
 
-    await fetch(`http://localhost:5000/api/contact/${id}`, {
+    await fetch(`https://react-backend-kzpr.onrender.com/api/contact/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`
