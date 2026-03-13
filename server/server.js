@@ -6,6 +6,7 @@ const mongoose = require("mongoose")
 const jwt = require("jsonwebtoken")
 const helmet = require("helmet")
 const rateLimit = require("express-rate-limit")
+const { Resend } = require("resend")
 
 const app = express()
 
@@ -19,7 +20,7 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
 })
-
+const resend = new Resend(process.env.RESEND_API_KEY)
 app.use(limiter)
 
 // ---------------- MIDDLEWARE ----------------
@@ -77,6 +78,27 @@ app.post("/api/contact", async (req, res) => {
   })
 
   await newContact.save()
+
+  try {
+
+    await resend.emails.send({
+      from: "Contact Form <onboarding@resend.dev>",
+      to: process.env.EMAIL,
+      subject: "New Contact Form Message",
+      html: `
+        <h2>New Message</h2>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Message:</b></p>
+        <p>${message}</p>
+      `
+    })
+
+  } catch (error) {
+
+    console.error("Email failed:", error)
+
+  }
 
   res.json({ message: "Message saved to database!" })
 
