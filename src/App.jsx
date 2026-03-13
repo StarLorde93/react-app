@@ -1,3 +1,5 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 
@@ -7,11 +9,9 @@ import Contact from "./pages/Contact"
 import Admin from "./pages/Admin"
 import Login from "./pages/Login"
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
 
       <Navbar />
 
@@ -20,14 +20,14 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/admin" element={<Admin />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin" element={<Admin />} />
 
       </Routes>
 
       <Footer />
 
-    </Router>
+    </BrowserRouter>
   )
 }
 
