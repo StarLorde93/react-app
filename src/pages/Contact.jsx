@@ -1,4 +1,5 @@
 import { useState } from "react"
+import ReCAPTCHA from "react-google-recaptcha"
 
 function Contact() {
 
@@ -6,14 +7,15 @@ function Contact() {
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState(null)
 
   const handleSubmit = async (e) => {
+
     e.preventDefault()
 
-    // prevent multiple submissions
     if (loading) return
 
-    // simple validation
+    // validation
     if (!name || !email || !message) {
       alert("Please fill all fields")
       return
@@ -21,6 +23,11 @@ function Contact() {
 
     if (!email.includes("@")) {
       alert("Please enter a valid email")
+      return
+    }
+
+    if (!captchaToken) {
+      alert("Please complete the captcha")
       return
     }
 
@@ -36,17 +43,24 @@ function Contact() {
         body: JSON.stringify({
           name,
           email,
-          message
+          message,
+          captchaToken
         })
       })
 
       const data = await response.json()
 
-      alert(data.message)
+      if (!response.ok) {
+        alert(data.message || "Failed to send message")
+        return
+      }
+
+      alert("Message sent successfully!")
 
       setName("")
       setEmail("")
       setMessage("")
+      setCaptchaToken(null)
 
     } catch (error) {
 
@@ -58,9 +72,11 @@ function Contact() {
       setLoading(false)
 
     }
+
   }
 
   return (
+
     <section className="py-24">
 
       <div className="max-w-xl mx-auto">
@@ -98,6 +114,11 @@ function Contact() {
             required
           />
 
+          <ReCAPTCHA
+            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+            onChange={(token) => setCaptchaToken(token)}
+          />
+
           <button
             type="submit"
             disabled={loading}
@@ -111,7 +132,9 @@ function Contact() {
       </div>
 
     </section>
+
   )
+
 }
 
 export default Contact

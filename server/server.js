@@ -7,27 +7,29 @@ const jwt = require("jsonwebtoken")
 const helmet = require("helmet")
 const rateLimit = require("express-rate-limit")
 const { Resend } = require("resend")
+const axios = require("axios")
 
 const app = express()
 
 // ---------------- SECURITY ----------------
 
-// adds security headers
 app.use(helmet())
 
-// limit requests to prevent spam
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
 })
-const resend = new Resend(process.env.RESEND_API_KEY)
+
 app.use(limiter)
+
+// ---------------- SERVICES ----------------
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 // ---------------- MIDDLEWARE ----------------
 
-// restrict API access to your frontend domain
 app.use(cors({
-  origin: "https://react-app.vercel.app"
+  origin: "https://react-app.vercel.app" // change to your real frontend URL
 }))
 
 app.use(express.json())
@@ -41,14 +43,14 @@ mongoose.connect(process.env.MONGO_URI)
 // ---------------- DATABASE MODEL ----------------
 
 const ContactSchema = new mongoose.Schema(
-  {
-    name: String,
-    email: String,
-    message: String
-  },
-  {
-    timestamps: true
-  }
+{
+  name: String,
+  email: String,
+  message: String
+},
+{
+  timestamps: true
+}
 )
 
 const Contact = mongoose.model("Contact", ContactSchema)
@@ -66,21 +68,40 @@ app.get("/api/message", (req, res) => {
   res.json({ message: "Hello from Node.js backend!" })
 })
 
-// Save contact form
+// ---------------- CONTACT FORM ----------------
+
 app.post("/api/contact", async (req, res) => {
 
-  const { name, email, message } = req.body
-
-  const newContact = new Contact({
-    name,
-    email,
-    message
-  })
-
-  await newContact.save()
+  const { name, email, message, captchaToken } = req.body
 
   try {
 
+    // verify captcha FIRST
+    const verify = await axios.post(
+      "https://www.google.com/recaptcha/api/siteverify",
+      null,
+      {
+        params: {
+          secret: process.env.RECAPTCHA_SECRET,
+          response: captchaToken
+        }
+      }
+    )
+
+    if (!verify.data.success) {
+      return res.status(400).json({ message: "Captcha failed" })
+    }
+
+    // save message
+    const newContact = new Contact({
+      name,
+      email,
+      message
+    })
+
+    await newContact.save()
+
+    // send email
     await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>",
       to: process.env.EMAIL,
@@ -94,13 +115,14 @@ app.post("/api/contact", async (req, res) => {
       `
     })
 
+    res.json({ message: "Message saved to database!" })
+
   } catch (error) {
 
-    console.error("Email failed:", error)
+    console.error(error)
+    res.status(500).json({ message: "Server error" })
 
   }
-
-  res.json({ message: "Message saved to database!" })
 
 })
 
