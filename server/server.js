@@ -29,7 +29,12 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 // ---------------- MIDDLEWARE ----------------
 
 app.use(cors({
-  origin: "https://react-app.vercel.app" // change to your real frontend URL
+  origin: [
+    "http://localhost:5173",
+    "https://react-app-plum-xi.vercel.app"
+  ],
+  methods: ["GET", "POST", "DELETE"],
+  credentials: true
 }))
 
 app.use(express.json())
