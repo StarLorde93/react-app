@@ -1,3 +1,5 @@
+require("dotenv").config()
+
 const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
@@ -10,7 +12,7 @@ app.use(express.json())
 
 // ---------------- DATABASE CONNECTION ----------------
 
-mongoose.connect("mongodb://admin:1234admin@ac-qea0e1h-shard-00-00.qsmrhn9.mongodb.net:27017,ac-qea0e1h-shard-00-01.qsmrhn9.mongodb.net:27017,ac-qea0e1h-shard-00-02.qsmrhn9.mongodb.net:27017/WebsiteCaptures?ssl=true&replicaSet=atlas-10t450-shard-0&authSource=admin&appName=mySumDatabase")
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.log(err))
 
