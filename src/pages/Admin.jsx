@@ -9,7 +9,6 @@ function Admin() {
 
   useEffect(() => {
 
-    // redirect to login if no token
     if (!token) {
       window.location.href = "/login"
       return
@@ -82,40 +81,81 @@ function Admin() {
 
   return (
 
-    <div className="max-w-4xl mx-auto py-20">
+    <div className="max-w-6xl mx-auto py-20 px-6">
 
       <h1 className="text-4xl font-bold mb-10 text-center">
         Contact Messages
       </h1>
 
-      <div className="space-y-6">
+      {contacts.length === 0 ? (
+        <p className="text-center text-gray-500">
+          No messages yet
+        </p>
+      ) : (
 
-        {contacts.length === 0 && (
-          <p className="text-center text-gray-500">
-            No messages yet
-          </p>
-        )}
+        <div className="overflow-x-auto">
 
-        {contacts.map(contact => (
+          <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
 
-          <div key={contact._id} className="border p-6 rounded-lg shadow">
+            <thead className="bg-gray-100">
 
-            <p><b>Name:</b> {contact.name}</p>
-            <p><b>Email:</b> {contact.email}</p>
-            <p><b>Message:</b> {contact.message}</p>
+              <tr className="text-left">
 
-            <button
-              onClick={() => deleteMessage(contact._id)}
-              className="mt-4 bg-red-600 text-white px-4 py-2 rounded"
-            >
-              Delete
-            </button>
+                <th className="p-4 border">Name</th>
+                <th className="p-4 border">Email</th>
+                <th className="p-4 border">Message</th>
+                <th className="p-4 border">Date</th>
+                <th className="p-4 border text-center">Action</th>
 
-          </div>
+              </tr>
 
-        ))}
+            </thead>
 
-      </div>
+            <tbody>
+
+              {contacts.map(contact => (
+
+                <tr key={contact._id} className="border-t">
+
+                  <td className="p-4 border">{contact.name}</td>
+
+                  <td className="p-4 border">
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="text-blue-600 underline"
+                    >
+                      {contact.email}
+                    </a>
+                  </td>
+
+                  <td className="p-4 border">{contact.message}</td>
+
+                  <td className="p-4 border text-sm text-gray-600">
+                    {new Date(contact.createdAt).toLocaleString()}
+                  </td>
+
+                  <td className="p-4 border text-center">
+
+                    <button
+                      onClick={() => deleteMessage(contact._id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      )}
 
     </div>
 
