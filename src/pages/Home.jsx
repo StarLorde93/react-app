@@ -8,7 +8,7 @@ function Home() {
 
   useEffect(() => {
 
-    fetch("react-backend-kzpr.onrender.com/api/message")
+    fetch(`${import.meta.env.VITE_API_URL}/api/message`)
       .then(res => res.json())
       .then(data => setMessage(data.message))
 

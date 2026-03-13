@@ -9,7 +9,7 @@ function Login() {
 
     e.preventDefault()
 
-    const res = await fetch("http://react-backend-kzpr.onrender.com/login", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
