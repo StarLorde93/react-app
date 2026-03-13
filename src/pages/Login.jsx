@@ -9,7 +9,7 @@ function Login() {
 
     e.preventDefault()
 
-    const res = await fetch("http://localhost:5000/api/login", {
+    const res = await fetch("http://react-backend-kzpr.onrender.com/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })

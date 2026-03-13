@@ -8,7 +8,7 @@ function Home() {
 
   useEffect(() => {
 
-    fetch("http://localhost:5000/api/message")
+    fetch("react-backend-kzpr.onrender.com/api/message")
       .then(res => res.json())
       .then(data => setMessage(data.message))
 
